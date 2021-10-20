@@ -5,119 +5,156 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 
-class ObjectA(BaseModel):
+class Person(BaseModel):
     id: str
-    value: str
+    name: str
 
 
-class ObjectB(BaseModel):
+class Computer(BaseModel):
     id: str
-    aId: str
-    value: str
+    personId: str
+    model: str
 
 
-class ObjectC(BaseModel):
+class ProjectInformation(BaseModel):
+    numberCommits: int
+    numberCollaborators: int
+    hostingPlatform: str
+
+
+class Project(BaseModel):
     id: str
-    aId: str
-    value: str
-    anotherValue: str
+    personId: str
+    projectName: str
+    projectInformation: ProjectInformation
 
 
-class ObjectX(BaseModel):
+class OfficePet(BaseModel):
     id: str
-    value: str
+    name: str
+    type: str
 
 
-class ObjectY(BaseModel):
+class PetToy(BaseModel):
     id: str
-    xId: str
-    value: str
+    petId: str
+    description: str
 
 
-objects_a = [
-    ObjectA(id="first", value="first_value"),
-    ObjectA(id="second", value="second_value")
+persons = [
+    Person(id="first", name="Max Musterman"),
+    Person(id="second", name="John Doe"),
 ]
 
-objects_b = [
-    ObjectB(id="aa", aId="first", value="a"),
-    ObjectB(id="ab", aId="first", value="b"),
-    ObjectB(id="ac", aId="first", value="b"),
-    ObjectB(id="bc", aId="second", value="foobar_second"),
+computers = [
+    Computer(id="aaaa", personId="first", model="Notebook 2010"),
+    Computer(id="aaab", personId="first", model="Notebook 2014"),
+    Computer(id="aaac", personId="first", model="Notebook 2020"),
+    Computer(id="bbbc", personId="second", model="Desktop 2021"),
 ]
 
-objects_c = [
-    ObjectC(id="ca", aId="first", value="a", anotherValue="another_a"),
-    ObjectC(id="cb", aId="first", value="b", anotherValue="another_b"),
-    ObjectC(id="cc", aId="first", value="b", anotherValue="foobar"),
-    ObjectC(id="cd", aId="second", value="c", anotherValue="test"),
+projects = [
+    Project(
+        id="ca",
+        personId="first",
+        projectName="Super Duper Project",
+        projectInformation=ProjectInformation(
+            numberCommits=10, numberCollaborators=1, hostingPlatform="github"
+        ),
+    ),
+    Project(
+        id="cb",
+        personId="first",
+        projectName="ML Project",
+        projectInformation=ProjectInformation(
+            numberCommits=3, numberCollaborators=1, hostingPlatform="gitlab"
+        ),
+    ),
+    Project(
+        id="cc",
+        personId="first",
+        projectName="Connector Project",
+        projectInformation=ProjectInformation(
+            numberCommits=100, numberCollaborators=3, hostingPlatform="github"
+        ),
+    ),
+    Project(
+        id="cd",
+        personId="second",
+        projectName="Fancy Project",
+        projectInformation=ProjectInformation(
+            numberCommits=10, numberCollaborators=2, hostingPlatform="github"
+        ),
+    ),
 ]
 
-objects_x = [
-    ObjectX(id="x1", value="first_x"),
-    ObjectX(id="x2", value="second_x"),
-    ObjectX(id="x3", value="third_x"),
+office_pets = [
+    OfficePet(id="p1", name="Broccoli", type="dog"),
+    OfficePet(id="p2", name="Fury", type="dog"),
+    OfficePet(id="p3", name="Donner", type="dog"),
 ]
 
-objects_y = [
-    ObjectY(id="1", xId="x1", value="hello"),
-    ObjectY(id="2", xId="x2", value="world"),
-    ObjectY(id="3", xId="x2", value="asdf"),
-    ObjectY(id="4", xId="x3", value="foo"),
-    ObjectY(id="5", xId="x3", value="bar"),
-    ObjectY(id="6", xId="x3", value="test"),
+pet_toys = [
+    PetToy(id="10", petId="p1", description="Ball"),
+    PetToy(id="11", petId="p1", description="Frisbee (green)"),
+    PetToy(id="20", petId="p2", description="Frisbee (green)"),
+    PetToy(id="30", petId="p3", description="Frisbee (red)"),
+    PetToy(id="31", petId="p3", description="Plush Teddy"),
 ]
 
 app = FastAPI()
 
 
-@app.get("/api/v1/objectAs", response_model=List[ObjectA])
-def read_objects_a():
-    return objects_a
+@app.get("/api/v1/persons", response_model=List[Person])
+def read_person():
+    return persons
 
 
-@app.get("/api/v1/objectA/{a_id}", response_model=Optional[ObjectA])
-def read_object_a_by_id(a_id: str):
-    for obj_a in objects_a:
-        if obj_a.id == a_id:
-            return obj_a
-
-    return JSONResponse(status_code=404, content={"message": "Not Found"})
-
-
-@app.get("/api/v1/objectA/{a_id}/objectBs", response_model=List[ObjectB])
-def read_objects_bs(a_id: str):
-    return [obj_b for obj_b in objects_b if obj_b.aId == a_id]
-
-
-@app.get("/api/v1/objectA/{a_id}/objectB/{b_id}", response_model=Optional[ObjectB])
-def read_object_b_by_id_of_a(a_id: str, b_id: str):
-    for obj_b in objects_b:
-        if (obj_b.aId == a_id) and (obj_b.id == b_id):
-            return obj_b
+@app.get("/api/v1/person/{person_id}", response_model=Optional[Person])
+def read_person_by_id(person_id: str):
+    for p in persons:
+        if p.id == person_id:
+            return p
 
     return JSONResponse(status_code=404, content={"message": "Not Found"})
 
 
-@app.get("/api/v1/objectA/{a_id}/objectCs", response_model=List[ObjectC])
-def read_object_c_by_id_of_a(a_id: str):
-    return [obj_c for obj_c in objects_c if obj_c.aId == a_id]
+@app.get("/api/v1/person/{person_id}/computers", response_model=List[Computer])
+def read_computers(person_id: str):
+    return [c for c in computers if c.personId == person_id]
 
 
-@app.get("/api/v1/objectXs", response_model=List[ObjectX])
-def read_objects_x():
-    return objects_x
+@app.get(
+    "/api/v1/person/{person_id}/computer/{computer_id}",
+    response_model=Optional[Computer],
+)
+def read_computer_by_id(person_id: str, computer_id: str):
+    for c in computers:
+        if (c.personId == person_id) and (c.id == computer_id):
+            return c
+
+    return JSONResponse(status_code=404, content={"message": "Not Found"})
 
 
-@app.get("/api/v1/objectX/{x_id}/objectYs", response_model=List[ObjectY])
-def read_objects_y_by_id_of_ax(x_id: str):
-    return [obj_y for obj_y in objects_y if obj_y.xId == x_id]
+@app.get("/api/v1/person/{person_id}/projects", response_model=List[Project])
+def read_projects_by_id_of_person(person_id: str):
+    return [p for p in projects if p.personId == person_id]
 
 
-@app.get("/api/v1/objectX/{x_id}/objectY/{y_id}", response_model=Optional[ObjectY])
-def read_object_b_by_id_of_a(x_id: str, y_id: str):
-    for obj_y in objects_y:
-        if (obj_y.xId == x_id) and (obj_y.id == y_id):
-            return obj_y
+@app.get("/api/v1/officePets", response_model=List[OfficePet])
+def read_office_pets():
+    return office_pets
+
+
+@app.get("/api/v1/officePet/{pet_id}/petToys", response_model=List[PetToy])
+def read_pet_toys_by_id_of_office_pet(pet_id: str):
+    return [pt for pt in pet_toys if pt.petId == pet_id]
+
+
+@app.get("/api/v1/officePet/{pet_id}/petToy/{toy_id}", response_model=Optional[PetToy])
+def read_pet_toy_by_id(pet_id: str, toy_id: str):
+    for pt in pet_toys:
+        if (pt.petId == pet_id) and (pt.id == toy_id):
+            return pt
 
     return JSONResponse(status_code=404, content={"message": "Not Found"})
